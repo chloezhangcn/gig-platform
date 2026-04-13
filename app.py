@@ -508,166 +508,174 @@ elif role == "👨‍💼 我是管理员":
                     grade_emoji = get_grade_emoji(grade)
                     st.warning(f"⚠️ 该作品已评分：{existing_score}分 {grade_emoji} {grade}")
                 
-                # 评分表单 - 三维度评分
-                with st.form(f"score_form_{sub['id']}"):
-                    st.markdown("#### 📋 创意营销赛评分表（总分100分）")
-                    
-                    # ========== 维度1：创新创意（0-30分）==========
-                    st.markdown("**维度1：创新创意（0-30分）**")
-                    col_d1_1, col_d1_2, col_d1_3 = st.columns(3)
-                    with col_d1_1:
-                        innovation_1 = st.slider(
-                            "① 独特视角与新颖表达",
-                            0, 10, existing_score // 3 if existing_score else 5,
-                            key=f"d1_1_{sub['id']}",
-                            help="视频是否具有独特视角和新颖的表达方式"
-                        )
-                    with col_d1_2:
-                        innovation_2 = st.slider(
-                            "② 吸引观众注意力",
-                            0, 10, existing_score // 4 if existing_score else 5,
-                            key=f"d1_2_{sub['id']}",
-                            help="内容能否吸引观众注意力"
-                        )
-                    with col_d1_3:
-                        innovation_3 = st.slider(
-                            "③ 项目商务策划创新性",
-                            0, 10, existing_score // 4 if existing_score else 5,
-                            key=f"d1_3_{sub['id']}",
-                            help="是否符合行业企业实践并进行了创新性策划"
-                        )
-                    innovation_score = innovation_1 + innovation_2 + innovation_3
-                    st.metric("创新创意小计", f"{innovation_score}/30分")
-                    
-                    st.markdown("---")
-                    
-                    # ========== 维度2：选题相关性（0-30分）==========
-                    st.markdown("**维度2：选题相关性（0-30分）**")
-                    col_d2_1, col_d2_2, col_d2_3 = st.columns(3)
-                    with col_d2_1:
-                        topic_1 = st.slider(
-                            "① 准确解读选题方向和受众需求",
-                            0, 10, existing_score // 4 if existing_score else 5,
-                            key=f"d2_1_{sub['id']}",
-                            help="是否准确解读选题方向和受众需求"
-                        )
-                    with col_d2_2:
-                        topic_2 = st.slider(
-                            "② 传达主题精神内涵",
-                            0, 10, existing_score // 4 if existing_score else 5,
-                            key=f"d2_2_{sub['id']}",
-                            help="是否准确传达主题精神内涵"
-                        )
-                    with col_d2_3:
-                        topic_3 = st.slider(
-                            "③ 主题分析解读的深度和广度",
-                            0, 10, existing_score // 4 if existing_score else 5,
-                            key=f"d2_3_{sub['id']}",
-                            help="对主题分析解读的深度和广度"
-                        )
-                    topic_score = topic_1 + topic_2 + topic_3
-                    st.metric("选题相关性小计", f"{topic_score}/30分")
-                    
-                    st.markdown("---")
-                    
-                    # ========== 维度3：呈现表达（0-40分）==========
-                    st.markdown("**维度3：呈现表达（0-40分）**")
-                    col_d3_1, col_d3_2, col_d3_3, col_d3_4 = st.columns(4)
-                    with col_d3_1:
-                        presentation_1 = st.slider(
-                            "① 画面质量（清晰度/色彩/构图）",
-                            0, 10, existing_score // 5 if existing_score else 5,
-                            key=f"d3_1_{sub['id']}",
-                            help="画面清晰度、色彩搭配、构图专业性"
-                        )
-                    with col_d3_2:
-                        presentation_2 = st.slider(
-                            "② 拍摄技巧专业性与艺术性",
-                            0, 10, existing_score // 5 if existing_score else 5,
-                            key=f"d3_2_{sub['id']}",
-                            help="拍摄技巧的专业性与艺术性"
-                        )
-                    with col_d3_3:
-                        presentation_3 = st.slider(
-                            "③ 后期制作（剪辑/特效/音效）",
-                            0, 10, existing_score // 5 if existing_score else 5,
-                            key=f"d3_3_{sub['id']}",
-                            help="后期制作的精致度（剪辑、特效、音效）"
-                        )
-                    with col_d3_4:
-                        presentation_4 = st.slider(
-                            "④ 内容文案逻辑与完整性",
-                            0, 10, existing_score // 5 if existing_score else 5,
-                            key=f"d3_4_{sub['id']}",
-                            help="内容文案的逻辑结构、完整性、严谨性、真人出镜"
-                        )
-                    presentation_score = presentation_1 + presentation_2 + presentation_3 + presentation_4
-                    st.metric("呈现表达小计", f"{presentation_score}/40分")
-                    
-                    st.markdown("---")
-                    
-                    # ========== 总分计算 ==========
-                    total_score = innovation_score + topic_score + presentation_score
-                    
-                    # 实时显示等级和结算信息
-                    grade = calculate_grade(total_score)
-                    coefficient = calculate_coefficient(total_score)
-                    task_price = sub.get("task_price", 50)
-                    calculated_amount = task_price * coefficient
-                    
-                    # 根据等级显示不同样式
-                    grade_styles = {
-                        "优秀": "score-excellent",
-                        "良好": "score-good",
-                        "合格": "score-pass",
-                        "不合格": "score-fail"
+                # ========== 评分组件（非表单，实现实时更新）==========
+                st.markdown("#### 📋 创意营销赛评分表（总分100分）")
+                
+                # 获取已有的维度分数
+                dim_scores = sub.get("dimension_scores", {})
+                
+                # ========== 维度1：创新创意（0-30分）==========
+                st.markdown("**维度1：创新创意（0-30分）**")
+                col_d1_1, col_d1_2, col_d1_3 = st.columns(3)
+                with col_d1_1:
+                    innovation_1 = st.slider(
+                        "① 独特视角与新颖表达",
+                        0, 10, 
+                        dim_scores.get("innovation_detail", {}).get("独特视角与新颖表达", 5),
+                        key=f"d1_1_{sub['id']}",
+                        help="视频是否具有独特视角和新颖的表达方式"
+                    )
+                with col_d1_2:
+                    innovation_2 = st.slider(
+                        "② 吸引观众注意力",
+                        0, 10, 
+                        dim_scores.get("innovation_detail", {}).get("吸引观众注意力", 5),
+                        key=f"d1_2_{sub['id']}",
+                        help="内容能否吸引观众注意力"
+                    )
+                with col_d1_3:
+                    innovation_3 = st.slider(
+                        "③ 项目商务策划创新性",
+                        0, 10, 
+                        dim_scores.get("innovation_detail", {}).get("项目商务策划创新性", 5),
+                        key=f"d1_3_{sub['id']}",
+                        help="是否符合行业企业实践并进行了创新性策划"
+                    )
+                innovation_score = innovation_1 + innovation_2 + innovation_3
+                st.metric("创新创意小计", f"{innovation_score}/30分")
+                
+                st.markdown("---")
+                
+                # ========== 维度2：选题相关性（0-30分）==========
+                st.markdown("**维度2：选题相关性（0-30分）**")
+                col_d2_1, col_d2_2, col_d2_3 = st.columns(3)
+                with col_d2_1:
+                    topic_1 = st.slider(
+                        "① 准确解读选题方向和受众需求",
+                        0, 10, 
+                        dim_scores.get("topic_detail", {}).get("解读选题方向和受众需求", 5),
+                        key=f"d2_1_{sub['id']}",
+                        help="是否准确解读选题方向和受众需求"
+                    )
+                with col_d2_2:
+                    topic_2 = st.slider(
+                        "② 传达主题精神内涵",
+                        0, 10, 
+                        dim_scores.get("topic_detail", {}).get("传达主题精神内涵", 5),
+                        key=f"d2_2_{sub['id']}",
+                        help="是否准确传达主题精神内涵"
+                    )
+                with col_d2_3:
+                    topic_3 = st.slider(
+                        "③ 主题分析解读的深度和广度",
+                        0, 10, 
+                        dim_scores.get("topic_detail", {}).get("主题分析解读深度和广度", 5),
+                        key=f"d2_3_{sub['id']}",
+                        help="对主题分析解读的深度和广度"
+                    )
+                topic_score = topic_1 + topic_2 + topic_3
+                st.metric("选题相关性小计", f"{topic_score}/30分")
+                
+                st.markdown("---")
+                
+                # ========== 维度3：呈现表达（0-40分）==========
+                st.markdown("**维度3：呈现表达（0-40分）**")
+                col_d3_1, col_d3_2, col_d3_3, col_d3_4 = st.columns(4)
+                with col_d3_1:
+                    presentation_1 = st.slider(
+                        "① 画面质量（清晰度/色彩/构图）",
+                        0, 10, 
+                        dim_scores.get("presentation_detail", {}).get("画面质量", 5),
+                        key=f"d3_1_{sub['id']}",
+                        help="画面清晰度、色彩搭配、构图专业性"
+                    )
+                with col_d3_2:
+                    presentation_2 = st.slider(
+                        "② 拍摄技巧专业性与艺术性",
+                        0, 10, 
+                        dim_scores.get("presentation_detail", {}).get("拍摄技巧专业性与艺术性", 5),
+                        key=f"d3_2_{sub['id']}",
+                        help="拍摄技巧的专业性与艺术性"
+                    )
+                with col_d3_3:
+                    presentation_3 = st.slider(
+                        "③ 后期制作（剪辑/特效/音效）",
+                        0, 10, 
+                        dim_scores.get("presentation_detail", {}).get("后期制作精致度", 5),
+                        key=f"d3_3_{sub['id']}",
+                        help="后期制作的精致度（剪辑、特效、音效）"
+                    )
+                with col_d3_4:
+                    presentation_4 = st.slider(
+                        "④ 内容文案逻辑与完整性",
+                        0, 10, 
+                        dim_scores.get("presentation_detail", {}).get("内容文案逻辑与完整性", 5),
+                        key=f"d3_4_{sub['id']}",
+                        help="内容文案的逻辑结构、完整性、严谨性、真人出镜"
+                    )
+                presentation_score = presentation_1 + presentation_2 + presentation_3 + presentation_4
+                st.metric("呈现表达小计", f"{presentation_score}/40分")
+                
+                st.markdown("---")
+                
+                # ========== 总分计算 ==========
+                total_score = innovation_score + topic_score + presentation_score
+                
+                # 实时显示等级和结算信息
+                grade = calculate_grade(total_score)
+                coefficient = calculate_coefficient(total_score)
+                task_price = sub.get("task_price", 50)
+                calculated_amount = task_price * coefficient
+                
+                # 根据等级显示不同样式
+                grade_styles = {
+                    "优秀": "score-excellent",
+                    "良好": "score-good",
+                    "合格": "score-pass",
+                    "不合格": "score-fail"
+                }
+                grade_style = grade_styles.get(grade, "")
+                
+                st.markdown(f"### 📊 总分：{total_score}/100分")
+                st.markdown(f"""
+                <div class="{grade_style}">
+                    <h3 style="margin: 0;">{get_grade_emoji(grade)} 等级：{grade}</h3>
+                    <p style="margin: 5px 0;">结算系数：<b>{coefficient}</b></p>
+                    <p style="margin: 5px 0;">任务单价：{task_price}元</p>
+                    <p style="margin: 5px 0;">结算金额：<b>¥{calculated_amount}</b></p>
+                </div>
+                """, unsafe_allow_html=True)
+                
+                # 保存各维度分数
+                dimension_scores = {
+                    "innovation": innovation_score,
+                    "topic": topic_score,
+                    "presentation": presentation_score,
+                    "innovation_detail": {
+                        "独特视角与新颖表达": innovation_1,
+                        "吸引观众注意力": innovation_2,
+                        "项目商务策划创新性": innovation_3
+                    },
+                    "topic_detail": {
+                        "解读选题方向和受众需求": topic_1,
+                        "传达主题精神内涵": topic_2,
+                        "主题分析解读深度和广度": topic_3
+                    },
+                    "presentation_detail": {
+                        "画面质量": presentation_1,
+                        "拍摄技巧专业性与艺术性": presentation_2,
+                        "后期制作精致度": presentation_3,
+                        "内容文案逻辑与完整性": presentation_4
                     }
-                    grade_style = grade_styles.get(grade, "")
-                    
-                    st.markdown(f"### 📊 总分：{total_score}/100分")
-                    st.markdown(f"""
-                    <div class="{grade_style}">
-                        <h3 style="margin: 0;">{get_grade_emoji(grade)} 等级：{grade}</h3>
-                        <p style="margin: 5px 0;">结算系数：<b>{coefficient}</b></p>
-                        <p style="margin: 5px 0;">任务单价：{task_price}元</p>
-                        <p style="margin: 5px 0;">结算金额：<b>¥{calculated_amount}</b></p>
-                    </div>
-                    """, unsafe_allow_html=True)
-                    
-                    # 保存各维度分数
-                    dimension_scores = {
-                        "innovation": innovation_score,
-                        "topic": topic_score,
-                        "presentation": presentation_score,
-                        "innovation_detail": {
-                            "独特视角与新颖表达": innovation_1,
-                            "吸引观众注意力": innovation_2,
-                            "项目商务策划创新性": innovation_3
-                        },
-                        "topic_detail": {
-                            "解读选题方向和受众需求": topic_1,
-                            "传达主题精神内涵": topic_2,
-                            "主题分析解读深度和广度": topic_3
-                        },
-                        "presentation_detail": {
-                            "画面质量": presentation_1,
-                            "拍摄技巧专业性与艺术性": presentation_2,
-                            "后期制作精致度": presentation_3,
-                            "内容文案逻辑与完整性": presentation_4
-                        }
-                    }
-                    
-                    # 审核备注
-                    review_notes = st.text_area("审核备注（可选）", placeholder="填写审核意见...", key=f"notes_{sub['id']}")
-                    
-                    # 提交按钮
-                    col_a, col_b = st.columns(2)
-                    with col_a:
-                        submit_score = st.form_submit_button("💾 提交评分", type="primary")
-                    with col_b:
-                        approve_direct = st.form_submit_button("✅ 通过并评分", type="secondary")
-                    
-                    if submit_score or approve_direct:
+                }
+                
+                # 审核备注
+                review_notes = st.text_area("审核备注（可选）", placeholder="填写审核意见...", key=f"notes_{sub['id']}")
+                
+                # 提交按钮（表单外）
+                col_a, col_b = st.columns(2)
+                with col_a:
+                    if st.button("💾 提交评分", type="primary", key=f"save_score_{sub['id']}"):
                         # 更新提交数据
                         for s in all_submissions:
                             if s["id"] == sub["id"]:
@@ -676,20 +684,35 @@ elif role == "👨‍💼 我是管理员":
                                 s["coefficient"] = coefficient
                                 s["amount"] = calculated_amount
                                 s["review_notes"] = review_notes
-                                s["dimension_scores"] = dimension_scores  # 保存详细维度分数
+                                s["dimension_scores"] = dimension_scores
                                 s["reviewed_by"] = "管理员"
                                 s["reviewed_at"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                                if approve_direct:
-                                    s["status"] = "approved"
-                                    s["approved_at"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                         
                         save_submissions(all_submissions)
                         
                         grade_emoji = get_grade_emoji(grade)
-                        if approve_direct:
-                            st.success(f"✅ 评分已提交并通过！{grade_emoji} {grade} | 结算金额：¥{calculated_amount}")
-                        else:
-                            st.success(f"💾 评分已保存！{grade_emoji} {grade} | 结算金额：¥{calculated_amount}")
+                        st.success(f"💾 评分已保存！{grade_emoji} {grade} | 结算金额：¥{calculated_amount}")
+                        st.rerun()
+                with col_b:
+                    if st.button("✅ 通过并评分", type="secondary", key=f"approve_score_{sub['id']}"):
+                        # 更新提交数据
+                        for s in all_submissions:
+                            if s["id"] == sub["id"]:
+                                s["score"] = total_score
+                                s["grade"] = grade
+                                s["coefficient"] = coefficient
+                                s["amount"] = calculated_amount
+                                s["review_notes"] = review_notes
+                                s["dimension_scores"] = dimension_scores
+                                s["reviewed_by"] = "管理员"
+                                s["reviewed_at"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                                s["status"] = "approved"
+                                s["approved_at"] = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                        
+                        save_submissions(all_submissions)
+                        
+                        grade_emoji = get_grade_emoji(grade)
+                        st.success(f"✅ 评分已提交并通过！{grade_emoji} {grade} | 结算金额：¥{calculated_amount}")
                         st.rerun()
     
     # ========== 全部作品页面 ==========
